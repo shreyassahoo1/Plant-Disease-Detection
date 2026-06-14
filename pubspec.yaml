@@ -1,4 +1,4 @@
-name: plant_app
+name: agro_net_ai
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -34,18 +34,20 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  camera: ^0.11.3
-  image_picker: ^1.2.1
-  sqflite: ^2.4.2
-  path: ^1.9.1
-  path_provider: ^2.1.5
-  intl: ^0.20.2
-  http: ^1.6.0
-  uuid: ^4.5.2
-  tflite_flutter: ^0.12.1
-  image: ^4.7.2
+  flutter_riverpod: ^3.3.1
+  go_router: ^17.2.3
+  dio: ^5.9.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  fl_chart: ^1.2.0
+  camera: ^0.12.0+1
+  image_picker: ^1.2.2
+  mqtt_client: ^10.11.11
+  google_fonts: ^8.1.0
+  lucide_icons: ^0.257.0
   google_generative_ai: ^0.4.7
-  image_cropper: ^11.0.0
+  flutter_dotenv: ^6.0.1
+  image_cropper: ^12.2.1
 
 dev_dependencies:
   flutter_test:
@@ -69,10 +71,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/models/
-
+    - .env
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
