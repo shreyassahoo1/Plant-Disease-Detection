@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../providers/sensor_provider.dart';
+import '../../../providers/history_provider.dart';
+import '../../../data/models/history_item.dart';
 import '../../../core/localization/translations.dart';
 import '../../widgets/glass_card.dart';
 
@@ -73,6 +76,38 @@ class _SensorsScreenState extends ConsumerState<SensorsScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text('Sensor Analytics'.tr(ref)),
+        actions: [
+          if (sensorState.hasValue)
+            IconButton(
+              icon: const Icon(LucideIcons.save),
+              tooltip: 'Record Snapshot'.tr(ref),
+              onPressed: () {
+                final data = sensorState.value!;
+                ref.read(historyProvider.notifier).addHistoryItem(
+                  HistoryItem(
+                    id: 'sensor_snap_${DateTime.now().millisecondsSinceEpoch}',
+                    type: 'SENSOR',
+                    timestamp: DateTime.now(),
+                    title: 'Manual Telemetry Snapshot',
+                    description: 'Logged: Temp ${data.temperature.toStringAsFixed(1)}°C, Moisture ${data.moisture.toStringAsFixed(1)}%',
+                    severity: 'INFO',
+                    metadata: {
+                      'temperature': data.temperature,
+                      'humidity': data.humidity,
+                      'moisture': data.moisture,
+                      'ph': data.ph,
+                    },
+                  ),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Telemetry snapshot saved to history!'.tr(ref)),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

@@ -67,32 +67,7 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
 
-          // Connectivity Card
-          GlassCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Connectivity (Mock)'.tr(ref), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                const SizedBox(height: 16),
-                ListTile(
-                  leading: const Icon(LucideIcons.wifi),
-                  title: Text('MQTT Broker URL'.tr(ref)),
-                  subtitle: const Text('mqtt://broker.emqx.io:1883'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
-                ),
-                ListTile(
-                  leading: const Icon(LucideIcons.database),
-                  title: Text('FastAPI Endpoint'.tr(ref)),
-                  subtitle: const Text('https://api.agronet.ai/v1'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

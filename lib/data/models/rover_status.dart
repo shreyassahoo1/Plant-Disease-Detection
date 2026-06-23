@@ -56,9 +56,9 @@ class RoverStatus {
     cameraActive: true,
     speed: 50.0,
     isAutoMode: false,
-    latitude: 12.9716,
-    longitude: 77.5946,
+    latitude: 12.9233643,
+    longitude: 77.5008269,
     heading: 0.0,
-    path: const [[12.9716, 77.5946]],
+    path: const [[12.9233643, 77.5008269]],
   );
 }

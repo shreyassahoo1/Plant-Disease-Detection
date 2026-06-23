@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../data/models/disease_result.dart';
+import '../data/models/history_item.dart';
+import 'history_provider.dart';
 
 final aiAnalysisProvider = NotifierProvider<AIAnalysisNotifier, AsyncValue<DiseaseResult?>>(AIAnalysisNotifier.new);
 
@@ -33,7 +35,7 @@ class AIAnalysisNotifier extends Notifier<AsyncValue<DiseaseResult?>> {
       // Fallback for simulated image paths from the UI (when testing without a real camera)
       if (!await imageFile.exists()) {
         await Future.delayed(const Duration(seconds: 2));
-        state = AsyncValue.data(DiseaseResult(
+        final result = DiseaseResult(
           diseaseName: 'Simulated Disease (No real image)',
           confidence: 99.9,
           severity: 'LOW',
@@ -41,7 +43,24 @@ class AIAnalysisNotifier extends Notifier<AsyncValue<DiseaseResult?>> {
           indianFertilizers: ['None'],
           imagePath: imagePath,
           timestamp: DateTime.now(),
+        );
+        ref.read(historyProvider.notifier).addHistoryItem(HistoryItem(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          type: 'SCAN',
+          timestamp: result.timestamp,
+          title: result.diseaseName,
+          description: 'AI Analysis confidence: ${result.confidence.toStringAsFixed(1)}%',
+          severity: result.severity,
+          metadata: {
+            'diseaseName': result.diseaseName,
+            'confidence': result.confidence,
+            'severity': result.severity,
+            'precautions': result.precautions,
+            'indianFertilizers': result.indianFertilizers,
+            'imagePath': result.imagePath,
+          },
         ));
+        state = AsyncValue.data(result);
         return;
       }
 
@@ -88,6 +107,23 @@ class AIAnalysisNotifier extends Notifier<AsyncValue<DiseaseResult?>> {
         imagePath: imagePath,
         timestamp: DateTime.now(),
       );
+
+      ref.read(historyProvider.notifier).addHistoryItem(HistoryItem(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        type: 'SCAN',
+        timestamp: result.timestamp,
+        title: result.diseaseName,
+        description: 'AI Analysis confidence: ${result.confidence.toStringAsFixed(1)}%',
+        severity: result.severity,
+        metadata: {
+          'diseaseName': result.diseaseName,
+          'confidence': result.confidence,
+          'severity': result.severity,
+          'precautions': result.precautions,
+          'indianFertilizers': result.indianFertilizers,
+          'imagePath': result.imagePath,
+        },
+      ));
 
       state = AsyncValue.data(result);
     } catch (e, st) {

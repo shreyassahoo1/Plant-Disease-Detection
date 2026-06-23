@@ -1,6 +1,6 @@
 {
-    "name": "agro_net_ai",
-    "short_name": "agro_net_ai",
+    "name": "ArgoNet",
+    "short_name": "ArgoNet",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

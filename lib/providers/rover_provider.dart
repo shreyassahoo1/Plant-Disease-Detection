@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../data/models/rover_status.dart';
+import '../data/models/history_item.dart';
+import 'history_provider.dart';
 
 final roverProvider = NotifierProvider<RoverNotifier, RoverStatus>(RoverNotifier.new);
 
@@ -54,8 +56,8 @@ class RoverNotifier extends Notifier<RoverStatus> {
             double nextHeading = state.heading;
             
             // Check if this is the first real GPS data overriding the mock default
-            final bool isFirstRealLock = (state.latitude == 12.9716 && state.longitude == 77.5946) &&
-                ((newLat - 12.9716).abs() > 0.005 || (newLon - 77.5946).abs() > 0.005);
+            final bool isFirstRealLock = (state.latitude == 12.9233643 && state.longitude == 77.5008269) &&
+                ((newLat - 12.9233643).abs() > 0.005 || (newLon - 77.5008269).abs() > 0.005);
             
             List<List<double>> nextPath;
             if (isFirstRealLock) {
@@ -192,6 +194,20 @@ class RoverNotifier extends Notifier<RoverStatus> {
     state = state.copyWith(isAutoMode: nextAutoMode);
 
     if (nextAutoMode) {
+      ref.read(historyProvider.notifier).addHistoryItem(HistoryItem(
+        id: 'rover_patrol_start_${DateTime.now().millisecondsSinceEpoch}',
+        type: 'ROVER',
+        timestamp: DateTime.now(),
+        title: 'Rover Auto-Patrol Started',
+        description: 'Rover initiated autonomous field grid patrol.',
+        severity: 'INFO',
+        metadata: {
+          'batteryStart': state.battery,
+          'latitude': state.latitude,
+          'longitude': state.longitude,
+        },
+      ));
+
       _autoPatrolTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (!state.isConnected || !state.isAutoMode) {
           timer.cancel();
@@ -232,6 +248,21 @@ class RoverNotifier extends Notifier<RoverStatus> {
       _autoPatrolTimer?.cancel();
       _autoPatrolTimer = null;
       state = state.copyWith(motorStatus: 'IDLE');
+
+      ref.read(historyProvider.notifier).addHistoryItem(HistoryItem(
+        id: 'rover_patrol_stop_${DateTime.now().millisecondsSinceEpoch}',
+        type: 'ROVER',
+        timestamp: DateTime.now(),
+        title: 'Rover Auto-Patrol Completed',
+        description: 'Patrol finished successfully. Rover placed in standby.',
+        severity: 'INFO',
+        metadata: {
+          'batteryEnd': state.battery,
+          'latitude': state.latitude,
+          'longitude': state.longitude,
+          'pathPoints': state.path.length,
+        },
+      ));
     }
   }
 }

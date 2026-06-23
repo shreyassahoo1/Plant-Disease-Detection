@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
-import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/dashboard/dashboard_screen.dart';
 import '../../presentation/screens/camera/camera_screen.dart';
 import '../../presentation/screens/sensors/sensors_screen.dart';
@@ -21,10 +20,6 @@ final goRouter = GoRouter(
     GoRoute(
       path: '/splash',
       builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
     ),
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
