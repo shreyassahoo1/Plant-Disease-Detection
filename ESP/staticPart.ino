@@ -5,8 +5,8 @@
 // ======================
 // WiFi Credentials
 // ======================
-const char* ssid = "ssid";
-const char* password = "pass";
+const char* ssid = "Samarjeet23";
+const char* password = "samyeet123";
 
 // ======================
 // Sensor Pins
@@ -79,6 +79,7 @@ void handleSensors() {
   json += "\"ph_voltage\":" + String(phVoltage, 2);
   json += "}";
 
+  server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "application/json", json);
 }
 
@@ -100,6 +101,7 @@ void handleRoot() {
   </html>
   )rawliteral";
 
+  server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "text/html", html);
 }
 

@@ -143,9 +143,8 @@ function DPad({ onMove, onStop, disabled }) {
 }
 
 export default function RoverPage() {
-  const { roverState, setRoverState, moveRover, stopRover, addHistory } = useApp()
+  const { roverState, setRoverState, moveRover, stopRover, addHistory, roverUrl, setRoverUrl, camStreamUrl, setCamStreamUrl } = useApp()
   const [view, setView] = useState('camera') // 'camera' | 'map'
-  const [camUrl, setCamUrl] = useState(import.meta.env.VITE_ESP32_CAM_URL || 'http://172.23.128.247:81/stream')
 
   const toggleAuto = () => {
     const next = !roverState.isAutoMode
@@ -196,12 +195,12 @@ export default function RoverPage() {
               ) : roverState.cameraActive ? (
                 <>
                   {roverState.isConnected ? (
-                    <img src={camUrl} alt="Rover stream" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    <img src={camStreamUrl} alt="Rover stream" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={e => { e.target.style.display = 'none' }} />
                   ) : null}
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                     <span style={{ fontSize: 40, marginBottom: 8 }}>📷</span>
-                    <div style={{ fontSize: 13 }}>Stream: {camUrl}</div>
+                    <div style={{ fontSize: 13 }}>Stream: {camStreamUrl}</div>
                     <div style={{ fontSize: 11, marginTop: 4, color: 'var(--text-muted)' }}>Connect rover to view live feed</div>
                   </div>
                   <div className="rec-badge">● REC</div>
@@ -287,11 +286,15 @@ export default function RoverPage() {
 
             {/* ESP32-CAM URL config */}
             <div className="glass-card">
+              <div style={{ fontWeight: 600, marginBottom: 10, fontSize: 13 }}>🤖 Rover Control URL</div>
+              <input className="input-field" style={{ fontSize: 12, marginBottom: 12 }} placeholder="http://192.168.x.x"
+                value={roverUrl} onChange={e => setRoverUrl(e.target.value)} />
+              
               <div style={{ fontWeight: 600, marginBottom: 10, fontSize: 13 }}>🎥 Camera Stream URL</div>
               <input className="input-field" style={{ fontSize: 12 }} placeholder="http://192.168.x.x:81/stream"
-                value={camUrl} onChange={e => setCamUrl(e.target.value)} />
+                value={camStreamUrl} onChange={e => setCamStreamUrl(e.target.value)} />
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
-                ESP32-CAM MJPEG stream URL from your rover
+                Enter local IP addresses for your ESP32 boards
               </div>
             </div>
           </div>

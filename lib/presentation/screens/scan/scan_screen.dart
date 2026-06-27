@@ -64,7 +64,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           ),
         );
 
-        final captureUrl = dotenv.env['ROVER_ESP32_CAM_CAPTURE_URL'] ?? 'http://172.23.128.247/capture';
+        final captureUrl = dotenv.env['ROVER_ESP32_CAM_CAPTURE_URL'] ?? 'http://172.20.10.7:81/capture
+';
         
         final dio = Dio();
         final response = await dio.get<List<int>>(
@@ -226,7 +227,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         if (_useRoverCam)
           Positioned.fill(
             child: ESP32CamViewer(
-              streamUrl: dotenv.env['ROVER_ESP32_CAM_STREAM_URL'] ?? 'http://172.23.128.247:81/stream',
+              streamUrl: dotenv.env['ROVER_ESP32_CAM_STREAM_URL'] ?? 'http://172.20.10.7:81/stream
+',
             ),
           )
         else if (_isCameraInitialized && _controller != null)

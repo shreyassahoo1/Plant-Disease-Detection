@@ -25,9 +25,47 @@ export function AppProvider({ children }) {
   const [weatherData, setWeatherData] = useState(null)
   const [weatherLoading, setWeatherLoading] = useState(true)
 
-  // Simulate sensor updates
+  // Global persistent connectivity settings (overridable in Settings/Rover UI)
+  const [roverUrl, setRoverUrl] = useState(() => {
+    return localStorage.getItem('agronet_rover_url') || import.meta.env.VITE_ROVER_URL || 'http://172.23.128.15'
+  })
+  const [sensorUrl, setSensorUrl] = useState(() => {
+    return localStorage.getItem('agronet_sensor_url') || import.meta.env.VITE_ESP32_SENSOR_URL || 'http://172.23.128.42/sensors'
+  })
+  const [camStreamUrl, setCamStreamUrl] = useState(() => {
+    return localStorage.getItem('agronet_cam_stream_url') || import.meta.env.VITE_ESP32_CAM_URL || 'http://172.20.10.7:81/stream'
+  })
+  const [camCaptureUrl, setCamCaptureUrl] = useState(() => {
+    return localStorage.getItem('agronet_cam_capture_url') || import.meta.env.VITE_ESP32_CAM_CAPTURE_URL || 'http://172.20.10.7:81/capture'
+  })
+
+  useEffect(() => { localStorage.setItem('agronet_rover_url', roverUrl) }, [roverUrl])
+  useEffect(() => { localStorage.setItem('agronet_sensor_url', sensorUrl) }, [sensorUrl])
+  useEffect(() => { localStorage.setItem('agronet_cam_stream_url', camStreamUrl) }, [camStreamUrl])
+  useEffect(() => { localStorage.setItem('agronet_cam_capture_url', camCaptureUrl) }, [camCaptureUrl])
+
+  // Fetch real sensor data if available, otherwise fallback to simulation
   useEffect(() => {
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(sensorUrl, { signal: AbortSignal.timeout(2000) })
+        if (res.ok) {
+          const data = await res.json()
+          setSensorData({
+            temperature: typeof data.temperature === 'number' ? data.temperature : 28.4,
+            humidity: typeof data.humidity === 'number' ? data.humidity : 62.3,
+            // Convert raw soil moisture (0-4095) to percentage (0-100%).
+            moisture: typeof data.soil === 'number' ? +Math.max(0, Math.min(100, 100 - (data.soil / 4095) * 100)).toFixed(1) : 41.5,
+            // Convert pH voltage (usually 0 - 3.3V) to pH scale (0 - 14)
+            ph: typeof data.ph_voltage === 'number' ? +Math.max(0, Math.min(14, 7 + (2.0 - data.ph_voltage) * 3.5)).toFixed(2) : 6.8,
+            timestamp: new Date()
+          })
+          return
+        }
+      } catch (err) {
+        // Fallback to simulation
+      }
+
       setSensorData(prev => ({
         temperature: +(prev.temperature + (Math.random() - 0.5) * 0.8).toFixed(1),
         humidity: +Math.max(20, Math.min(95, prev.humidity + (Math.random() - 0.5) * 1.5)).toFixed(1),
@@ -37,7 +75,7 @@ export function AppProvider({ children }) {
       }))
     }, 3000)
     return () => clearInterval(interval)
-  }, [])
+  }, [sensorUrl])
 
   // Connect rover after delay
   useEffect(() => {
@@ -46,6 +84,35 @@ export function AppProvider({ children }) {
     }, 2000)
     return () => clearTimeout(t)
   }, [])
+
+  // Poll GPS location from physical rover if available
+  useEffect(() => {
+    if (!roverState.isConnected) return
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`${roverUrl}/gps`, { signal: AbortSignal.timeout(2000) })
+        if (res.ok) {
+          const data = await res.json()
+          if (data.latitude && data.longitude) {
+            setRoverState(prev => {
+              // Only update if coords are valid and non-zero
+              if (data.latitude === 0 && data.longitude === 0) return prev;
+              const nextPath = [...prev.path, [data.latitude, data.longitude]].slice(-50)
+              return {
+                ...prev,
+                latitude: data.latitude,
+                longitude: data.longitude,
+                path: nextPath
+              }
+            })
+          }
+        }
+      } catch (err) {
+        // Fallback silently if offline
+      }
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [roverState.isConnected])
 
   // Rover battery drain
   useEffect(() => {
@@ -137,19 +204,17 @@ export function AppProvider({ children }) {
       return { ...prev, motorStatus: `MOVING_${direction}`, latitude: nextLat, longitude: nextLon, heading: nextHeading, path: nextPath }
     })
     try {
-      const roverUrl = import.meta.env.VITE_ROVER_URL || 'http://172.23.128.15'
       await fetch(`${roverUrl}/${direction.toLowerCase()}`, { signal: AbortSignal.timeout(2000) })
     } catch { }
-  }, [roverState.isConnected])
+  }, [roverState.isConnected, roverUrl])
 
   const stopRover = useCallback(async () => {
     if (!roverState.isConnected) return
     setRoverState(p => ({ ...p, motorStatus: 'IDLE' }))
     try {
-      const roverUrl = import.meta.env.VITE_ROVER_URL || 'http://172.23.128.15'
       await fetch(`${roverUrl}/stop`, { signal: AbortSignal.timeout(2000) })
     } catch { }
-  }, [roverState.isConnected])
+  }, [roverState.isConnected, roverUrl])
 
   const ctx = {
     page, setPage,
@@ -160,6 +225,10 @@ export function AppProvider({ children }) {
     history, addHistory, clearHistory, deleteHistoryItem,
     sensorData,
     roverState, setRoverState, moveRover, stopRover,
+    roverUrl, setRoverUrl,
+    sensorUrl, setSensorUrl,
+    camStreamUrl, setCamStreamUrl,
+    camCaptureUrl, setCamCaptureUrl,
     weatherData, weatherLoading,
   }
 

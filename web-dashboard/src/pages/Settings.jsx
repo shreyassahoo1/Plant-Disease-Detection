@@ -9,15 +9,15 @@ const LANGUAGES = [
   { code: 'kn', label: 'Kannada', native: 'ಕನ್ನಡ' },
 ]
 
-const ESP_DEFAULTS = {
-  roverUrl: import.meta.env.VITE_ROVER_URL || 'http://172.23.128.15',
-  sensorUrl: import.meta.env.VITE_ESP32_SENSOR_URL || 'http://172.23.128.42/sensors',
-  camStreamUrl: import.meta.env.VITE_ESP32_CAM_URL || 'http://172.23.128.247:81/stream',
-  camCaptureUrl: import.meta.env.VITE_ESP32_CAM_CAPTURE_URL || 'http://172.23.128.247/capture',
-}
 
 export default function SettingsPage() {
-  const { language, setLanguage, theme, toggleTheme, history, clearHistory } = useApp()
+  const {
+    language, setLanguage, theme, toggleTheme, history, clearHistory,
+    roverUrl, setRoverUrl,
+    sensorUrl, setSensorUrl,
+    camStreamUrl, setCamStreamUrl,
+    camCaptureUrl, setCamCaptureUrl,
+  } = useApp()
   const apiKey = localStorage.getItem('gemini_api_key') || ''
 
   const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0]
@@ -104,17 +104,22 @@ export default function SettingsPage() {
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>Configure via environment variables or .env file</div>
           {[
-            { label: 'Rover Control URL', key: 'VITE_ROVER_URL', value: ESP_DEFAULTS.roverUrl },
-            { label: 'Sensor Data URL', key: 'VITE_ESP32_SENSOR_URL', value: ESP_DEFAULTS.sensorUrl },
-            { label: 'Camera Stream URL', key: 'VITE_ESP32_CAM_URL', value: ESP_DEFAULTS.camStreamUrl },
-            { label: 'Camera Capture URL', key: 'VITE_ESP32_CAM_CAPTURE_URL', value: ESP_DEFAULTS.camCaptureUrl },
+            { label: 'Rover Control URL', key: 'VITE_ROVER_URL', value: roverUrl, onChange: setRoverUrl },
+            { label: 'Sensor Data URL', key: 'VITE_ESP32_SENSOR_URL', value: sensorUrl, onChange: setSensorUrl },
+            { label: 'Camera Stream URL', key: 'VITE_ESP32_CAM_URL', value: camStreamUrl, onChange: setCamStreamUrl },
+            { label: 'Camera Capture URL', key: 'VITE_ESP32_CAM_CAPTURE_URL', value: camCaptureUrl, onChange: setCamCaptureUrl },
           ].map(item => (
-            <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--border-color)', fontSize: 14 }}>
-              <div>
-                <div style={{ fontWeight: 500 }}>{item.label}</div>
-                <div style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--text-muted)', marginTop: 2 }}>{item.key}</div>
+            <div key={item.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border-color)', gap: 16 }}>
+              <div style={{ minWidth: 160 }}>
+                <div style={{ fontWeight: 500, fontSize: 14 }}>{item.label}</div>
+                <div style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-muted)', marginTop: 2 }}>{item.key}</div>
               </div>
-              <div style={{ fontFamily: 'monospace', fontSize: 13, color: 'var(--accent-cyan)', textAlign: 'right', maxWidth: '200px', wordBreak: 'break-all' }}>{item.value}</div>
+              <input
+                className="input-field"
+                style={{ fontFamily: 'monospace', fontSize: 13, color: 'var(--accent-cyan)', margin: 0, padding: '6px 10px', width: '60%', textAlign: 'left' }}
+                value={item.value}
+                onChange={e => item.onChange(e.target.value)}
+              />
             </div>
           ))}
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 12, padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>

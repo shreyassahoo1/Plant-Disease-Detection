@@ -88,7 +88,7 @@ class _RoverScreenState extends ConsumerState<RoverScreen> {
                             color: Colors.black87,
                             child: roverState.cameraActive 
                               ? ESP32CamViewer(
-                                  streamUrl: dotenv.env['ROVER_ESP32_CAM_STREAM_URL'] ?? 'http://172.23.128.247:81/stream',
+                                  streamUrl: dotenv.env['ROVER_ESP32_CAM_STREAM_URL'] ?? 'http://172.20.10.7:81/stream',
                                 )
                               : const Center(child: Icon(LucideIcons.cameraOff, size: 48, color: Colors.white54)),
                           ),

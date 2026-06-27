@@ -68,8 +68,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   }
 
   Widget _buildCameraViews() {
-    final roverStreamUrl = dotenv.env['ROVER_ESP32_CAM_STREAM_URL'] ?? 'http://172.23.128.247:81/stream';
-    final staticStreamUrl = dotenv.env['STATIC_ESP32_CAM_STREAM_URL'] ?? 'http://172.23.128.102:81/stream';
+    final roverStreamUrl = dotenv.env['ROVER_ESP32_CAM_STREAM_URL'] ?? 'http://172.20.10.7:81/stream';
+    final staticStreamUrl = dotenv.env['STATIC_ESP32_CAM_STREAM_URL'] ?? 'http://172.20.10.7:81/stream';
 
     if (_currentMode == CameraViewMode.split) {
       return Column(
